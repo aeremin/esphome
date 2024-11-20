@@ -61,8 +61,8 @@ static const uint8_t PMU_CFG[] = {
     11,          // length
     0x11,        // IRQ Enable: PVDD + temp sensor IRQs
     0x01,        // RFU
-    0x01,        // Power and Clock Configuration, device on (CFG1)
-    0x01,        // Power and Clock Configuration, device off (CFG1)
+    0x02,        // Power and Clock Configuration, device on (CFG2)
+    0x02,        // Power and Clock Configuration, device off (CFG2)
     0x00,        // RFU
     0x00,        // DC-DC 0
     0x00,        // DC-DC 1
