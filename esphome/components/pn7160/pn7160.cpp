@@ -701,6 +701,9 @@ void PN7160::nci_fsm_transition_() {
     case NCIState::EP_SELECTING:
     case NCIState::EP_DEACTIVATING:
       if (this->irq_pin_->digital_read()) {
+        // #region agent log
+        ESP_LOGW(TAG, "[DBG-57126c-H3] fsm calling process_message_, state=%u", (uint8_t) this->nci_state_);
+        // #endregion
         this->process_message_();
       }
       break;
@@ -740,6 +743,13 @@ bool PN7160::nci_fsm_set_error_state_(NCIState new_state) {
 void PN7160::process_message_() {
   nfc::NciMessage rx;
   if (this->read_nfcc(rx, NFCC_DEFAULT_TIMEOUT) != nfc::STATUS_OK) {
+    // #region agent log
+    if (!rx.get_message().empty()) {
+      char dbg_buf[nfc::FORMAT_BYTES_BUFFER_SIZE];
+      ESP_LOGW(TAG, "[DBG-57126c-H3] process_message_ read failed but rx has %u bytes: %s, nci_state=%u",
+               rx.get_message().size(), nfc::format_bytes_to(dbg_buf, rx.get_message()), (uint8_t) this->nci_state_);
+    }
+    // #endregion
     return;  // No data
   }
 
@@ -1131,6 +1141,10 @@ uint8_t PN7160::transceive_(nfc::NciMessage &tx, nfc::NciMessage &rx, const uint
     ESP_LOGVV(TAG, "Wrote: %s", nfc::format_bytes_to(buf, tx.get_message()));
     // next, the NFCC should send back a response
     if (this->read_nfcc(rx, timeout) != nfc::STATUS_OK) {
+      // #region agent log
+      ESP_LOGW(TAG, "[DBG-57126c-H2] transceive_ read failed, retries_left=%u, will re-send cmd gid=0x%02X oid=0x%02X",
+               retries, tx.get_gid(), tx.get_oid());
+      // #endregion
       ESP_LOGW(TAG, "Error receiving message");
       if (!retries--) {
         ESP_LOGE(TAG, "  ...giving up");

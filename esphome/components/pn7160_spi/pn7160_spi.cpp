@@ -29,11 +29,6 @@ uint8_t PN7160Spi::read_nfcc(nfc::NciMessage &rx, const uint16_t timeout) {
     this->read_array(rx.get_message().data() + nfc::NCI_PKT_HEADER_SIZE, length);
   }
   this->disable();
-  // semaphore to ensure transaction is complete before returning
-  if (this->wait_for_irq_(pn7160::NFCC_DEFAULT_TIMEOUT, false) != nfc::STATUS_OK) {
-    ESP_LOGW(TAG, "read_nfcc_() post-read timeout waiting for IRQ line to clear");
-    return nfc::STATUS_FAILED;
-  }
   return nfc::STATUS_OK;
 }
 

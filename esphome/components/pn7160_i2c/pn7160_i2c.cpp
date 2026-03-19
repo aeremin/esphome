@@ -25,11 +25,11 @@ uint8_t PN7160I2C::read_nfcc(nfc::NciMessage &rx, const uint16_t timeout) {
       return nfc::STATUS_FAILED;
     }
   }
-  // semaphore to ensure transaction is complete before returning
-  if (this->wait_for_irq_(pn7160::NFCC_DEFAULT_TIMEOUT, false) != nfc::STATUS_OK) {
-    ESP_LOGW(TAG, "read_nfcc_() post-read timeout waiting for IRQ line to clear");
-    return nfc::STATUS_FAILED;
+  // #region agent log
+  if (this->irq_pin_->digital_read()) {
+    ESP_LOGD(TAG, "[DBG-57126c-POSTFIX] post-read IRQ still HIGH (more data pending), read OK: payload=%u", length);
   }
+  // #endregion
   return nfc::STATUS_OK;
 }
 
